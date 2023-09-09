@@ -1,0 +1,84 @@
+---
+title: "Prokect 4"
+author: "Symphony Hopkins"
+date: "2023-04-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Read the dataset in Batteries_Life.csv Download Batteries_Life.csv into R. Name the loaded data Batteries_Life. And use the head() function to show the first 6 rows.**
+
+```{r, include = TRUE, echo = TRUE}
+#importing dataset
+Batteries_Life <- read.csv("~/Documents/Maryville_University/DSCI_618/Week 4/Batteries_Life.csv")
+
+#displaying first 6 rows
+head(Batteries_Life, 6)
+```
+
+**Conduct the analysis of variance and test hypotheses on the main effects. What conclusions can be drawn using significance level=0.05?**
+
+```{r, include = TRUE, echo = TRUE}
+#converting columns to factors
+factors <- c('Brand','Device')
+Batteries_Life[,factors] <- lapply(Batteries_Life[,factors], as.factor)
+
+#two-way ANOVA model 
+bl_two_way <- aov(Life ~ Brand + Device, data=Batteries_Life)
+summary(bl_two_way)
+
+```
+
+The brand's p-value, 0.0112, is less than our significance level (=0.05), which means we can reject the null hypothesis and conclude that there is a significant difference in mean battery life due to brand type.
+
+The device's p-value, 4.5e-07, is less than our significance level (=0.05), which means we can reject the null hypothesis and conclude that there is a significance difference in mean battery life due to device type.
+
+Overall, we can conclude that the main effects, brand and device, are significant.
+
+**Construct an interaction plot.**
+```{r, include = TRUE, echo = TRUE}
+#importing library
+library(ggplot2)
+
+#creating interaction plot
+with(data = Batteries_Life, interaction.plot(Brand, Device, Life, type="b", pch=19, fixed=T,
+                                             xlab='Brand', ylab='Mean Life',col=10:12))
+
+```
+
+The slopes of the lines appear slightly different (almost parallel but not exactly), so there may be a slight interaction; however, we would have to conduct a two-way ANOVA with interaction before making conclusions.
+
+**Test on the interaction between factors. What conclusions can be drawn using significance level=0.05?**
+
+```{r, include = TRUE, echo = TRUE}
+#two-way ANOVA model with interaction
+bl_two_way_ir <- aov(Life ~ Brand * Device, data=Batteries_Life)
+summary(bl_two_way_ir)
+```
+
+Once again, we can see that brand and device type have p-values less than 0.05, so we can conclude that they have a significant effect on the difference in mean battery life. 
+
+The p-value for the interaction between brand and device type is greater than our significance level (0.6430 > 0.05), so we can conclude that the interaction is not significant.
+
+**Prepare appropriate residual plots and comment on the model’s adequacy.**
+
+```{r, include = TRUE, echo = TRUE}
+#checking model assumptions
+opar <- par(mfrow=c(2,2),cex=.8)
+plot(bl_two_way_ir)
+```
+
+For the residuals vs fitted plot, we don't see any non-linear patterns, so that is a good indication that we don't have any non-linear relationships. It appears that there a slightly larger variance in the larger fitted values. In the normal Q-Q plot, the points follow the diagonal line for the most part, so we can assume normality. However residual points 4, 7, and 8 seem to be extreme, so we may need to investigate the effects of these points. The Constant Leverage plot indicates this information as well. For the Scale-Location plot, the points are not equal spread so we cannot assume homoscedasticity.  
+
+**Which brand of batteries would you recommend?**
+
+From the interaction plot we created earlier, we saw that brand B had a higher life average compared to brand A, and we know that this difference in means is significant because of our findings from the two-way ANOVA test; so, we would recommend **brand B** batteries. 
+
+
+
+
+
+
